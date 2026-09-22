@@ -1,0 +1,67 @@
+# Render Blueprint — backend API + AI service
+# Deploy: render.com → New → Blueprint → connect repo → uses this file.
+# PostgreSQL is provisioned on Neon; export its pooled connection string as DATABASE_URL.
+
+services:
+  - type: web
+    name: urbanflow-api
+    runtime: node
+    rootDir: backend
+    buildCommand: npm ci
+    startCommand: node src/index.js
+    healthCheckPath: /health/ready
+    plan: starter
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 4000
+      - key: DATABASE_URL
+        sync: false            # paste Neon pooled connection string
+      - key: DB_SSL
+        value: 'true'
+      - key: REDIS_URL
+        sync: false            # e.g. redis://red-xxxx:6379 (Render Key Value)
+      - key: AI_SERVICE_URL
+        fromService:
+          name: urbanflow-ai
+          type: web
+          property: host
+      - key: AI_SERVICE_TOKEN
+        generateValue: true
+      - key: JWT_ACCESS_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: CORS_ORIGINS
+        value: 'https://urbanflow.vercel.app'
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+
+  - type: web
+    name: urbanflow-ai
+    runtime: python
+    rootDir: ai-service
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port 8000
+    healthCheckPath: /health
+    plan: starter
+    autoDeploy: true
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.6
+      - key: INTERNAL_TOKEN
+        sync: false            # must match AI_SERVICE_TOKEN on the API
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false

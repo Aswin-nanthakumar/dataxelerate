@@ -1,0 +1,177 @@
+{
+  "info": {
+    "name": "URBANFLOW AI API",
+    "description": "AI-Powered Smart Urban Mobility Analytics & First/Last-Mile Connectivity Prediction Platform. Set {{baseUrl}} and run the Login request — the collection stores the access token automatically.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:4000/api/v1" },
+    { "key": "accessToken", "value": "" },
+    { "key": "refreshToken", "value": "" },
+    { "key": "sessionId", "value": "" }
+  ],
+  "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }] },
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        { "name": "Liveness", "request": { "method": "GET", "url": "{{baseUrl}}/health", "auth": { "type": "noauth" } } },
+        { "name": "Readiness", "request": { "method": "GET", "url": "{{baseUrl}}/health/ready", "auth": { "type": "noauth" } } }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST", "auth": { "type": "noauth" },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"admin@urbanflow.ai\",\n  \"password\": \"Urbanflow#2026\"\n}" },
+            "url": "{{baseUrl}}/auth/login",
+            "description": "Stores accessToken and refreshToken collection variables."
+          },
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "const j = pm.response.json();",
+              "if (j.data) {",
+              "  pm.collectionVariables.set('accessToken', j.data.accessToken);",
+              "  pm.collectionVariables.set('refreshToken', j.data.refreshToken);",
+              "}"
+            ] }
+          }]
+        },
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST", "auth": { "type": "noauth" },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"new.planner@urbanflow.ai\",\n  \"password\": \"SuperSecret#123\",\n  \"fullName\": \"New Planner\",\n  \"role\": \"city_planner\"\n}" },
+            "url": "{{baseUrl}}/auth/register"
+          }
+        },
+        {
+          "name": "Refresh",
+          "request": {
+            "method": "POST", "auth": { "type": "noauth" },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}" },
+            "url": "{{baseUrl}}/auth/refresh"
+          }
+        },
+        { "name": "Me", "request": { "method": "GET", "url": "{{baseUrl}}/auth/me" } },
+        { "name": "Logout", "request": { "method": "POST", "url": "{{baseUrl}}/auth/logout", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}" } } }
+      ]
+    },
+    {
+      "name": "Mobility & GIS",
+      "item": [
+        { "name": "Dashboard", "request": { "method": "GET", "url": "{{baseUrl}}/mobility/dashboard" } },
+        { "name": "KPIs", "request": { "method": "GET", "url": "{{baseUrl}}/mobility/dashboard/kpis" } },
+        { "name": "GIS zones", "request": { "method": "GET", "url": "{{baseUrl}}/mobility/gis/zones" } },
+        { "name": "GIS points (metro)", "request": { "method": "GET", "url": "{{baseUrl}}/mobility/gis/points?mode=metro" } },
+        { "name": "GIS routes", "request": { "method": "GET", "url": "{{baseUrl}}/mobility/gis/routes" } },
+        {
+          "name": "Geo / radius search",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/mobility/gis/search?q=tambaram&lat=13.05&lng=80.2&radius_km=3", "host": ["{{baseUrl}}"], "path": ["mobility", "gis", "search"], "query": [{ "key": "q", "value": "tambaram" }, { "key": "lat", "value": "13.05" }, { "key": "lng", "value": "80.2" }, { "key": "radius_km", "value": "3" }] } }
+        },
+        { "name": "Traffic hotspots", "request": { "method": "GET", "url": "{{baseUrl}}/mobility/traffic/hotspots" } },
+        { "name": "Heatmap ridership", "request": { "method": "GET", "url": "{{baseUrl}}/mobility/heatmap/ridership" } },
+        { "name": "Heatmap congestion", "request": { "method": "GET", "url": "{{baseUrl}}/mobility/heatmap/congestion" } }
+      ]
+    },
+    {
+      "name": "Analytics",
+      "item": [
+        { "name": "Connectivity scores", "request": { "method": "GET", "url": "{{baseUrl}}/connectivity?sort=-composite_score&limit=5" } },
+        { "name": "Connectivity rankings", "request": { "method": "GET", "url": "{{baseUrl}}/connectivity/rankings" } },
+        { "name": "Connectivity heatmap", "request": { "method": "GET", "url": "{{baseUrl}}/connectivity/heatmap" } },
+        { "name": "First-mile", "request": { "method": "GET", "url": "{{baseUrl}}/first-mile" } },
+        { "name": "Last-mile", "request": { "method": "GET", "url": "{{baseUrl}}/last-mile" } },
+        { "name": "Gap urgency", "request": { "method": "GET", "url": "{{baseUrl}}/gap-urgency" } },
+        { "name": "Forecast daily 14", "request": { "method": "GET", "url": "{{baseUrl}}/forecast?granularity=daily&horizon=14" } },
+        { "name": "Forecast hourly 24", "request": { "method": "GET", "url": "{{baseUrl}}/forecast?granularity=hourly&horizon=24" } }
+      ]
+    },
+    {
+      "name": "Recommendations",
+      "item": [
+        { "name": "List", "request": { "method": "GET", "url": "{{baseUrl}}/recommendations" } },
+        { "name": "Generate", "request": { "method": "POST", "url": "{{baseUrl}}/recommendations/generate" } },
+        { "name": "Approve", "request": { "method": "PATCH", "url": "{{baseUrl}}/recommendations/REPLACE_ID", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"status\": \"approved\"\n}" } } }
+      ]
+    },
+    {
+      "name": "Simulation",
+      "item": [
+        {
+          "name": "Run what-if",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"New feeder stop — Tambaram\",\n  \"kind\": \"bus_stop\",\n  \"coordinates\": [80.2, 13.05],\n  \"radius_km\": 2\n}" },
+            "url": "{{baseUrl}}/simulations"
+          }
+        },
+        { "name": "List", "request": { "method": "GET", "url": "{{baseUrl}}/simulations" } }
+      ]
+    },
+    {
+      "name": "Reports",
+      "item": [
+        {
+          "name": "Generate PDF",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"reportType\": \"mobility_overview\",\n  \"period\": \"monthly\",\n  \"format\": \"pdf\"\n}" },
+            "url": "{{baseUrl}}/reports"
+          }
+        },
+        {
+          "name": "Download CSV stream",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"reportType\": \"investment_plan\",\n  \"period\": \"annual\",\n  \"format\": \"csv\"\n}" },
+            "url": "{{baseUrl}}/reports?download=true"
+          }
+        },
+        { "name": "List", "request": { "method": "GET", "url": "{{baseUrl}}/reports" } }
+      ]
+    },
+    {
+      "name": "Copilot",
+      "item": [
+        {
+          "name": "Chat",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"message\": \"Show connectivity gaps\",\n  \"sessionId\": \"{{sessionId}}\"\n}" },
+            "url": "{{baseUrl}}/copilot/chat"
+          },
+          "event": [{ "listen": "test", "script": { "exec": ["const j = pm.response.json();", "if (j.data?.session_id) pm.collectionVariables.set('sessionId', j.data.session_id);"] } }]
+        },
+        { "name": "History", "request": { "method": "GET", "url": "{{baseUrl}}/copilot/sessions/{{sessionId}}" } }
+      ]
+    },
+    {
+      "name": "Notifications & Admin",
+      "item": [
+        { "name": "List notifications", "request": { "method": "GET", "url": "{{baseUrl}}/notifications" } },
+        { "name": "Read all", "request": { "method": "POST", "url": "{{baseUrl}}/notifications/read-all" } },
+        { "name": "Users", "request": { "method": "GET", "url": "{{baseUrl}}/admin/users" } },
+        { "name": "Audit", "request": { "method": "GET", "url": "{{baseUrl}}/admin/audit" } },
+        { "name": "Capabilities", "request": { "method": "GET", "url": "{{baseUrl}}/admin/capabilities" } }
+      ]
+    },
+    {
+      "name": "Docs",
+      "item": [
+        { "name": "OpenAPI spec", "request": { "method": "GET", "url": "{{baseUrl}}/openapi.json", "auth": { "type": "noauth" } } }
+      ]
+    }
+  ]
+}

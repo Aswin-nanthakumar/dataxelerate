@@ -1,0 +1,80 @@
+# URBANFLOW AI — full platform stack
+# Usage: docker compose up --build
+# API → http://localhost:4000 · Frontend → http://localhost:5173 · AI docs → http://localhost:8000/docs
+
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    environment:
+      POSTGRES_USER: urbanflow
+      POSTGRES_PASSWORD: urbanflow
+      POSTGRES_DB: urbanflow
+    ports: ['5432:5432']
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U urbanflow']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    ports: ['6379:6379']
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  ai-service:
+    build:
+      context: .
+      dockerfile: ai-service/Dockerfile
+    environment:
+      INTERNAL_TOKEN: ${AI_SERVICE_TOKEN:-urbanflow-internal}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+    ports: ['8000:8000']
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      DATABASE_URL: postgres://urbanflow:urbanflow@db:5432/urbanflow
+      REDIS_URL: redis://redis:6379
+      AI_SERVICE_URL: http://ai-service:8000
+      AI_SERVICE_TOKEN: ${AI_SERVICE_TOKEN:-urbanflow-internal}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-change-me-access}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-change-me-refresh}
+      CORS_ORIGINS: ${CORS_ORIGINS:-*}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+    ports: ['4000:4000']
+    depends_on:
+      db: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      ai-service: { condition: service_started }
+
+  frontend:
+    build: ./frontend
+    environment:
+      VITE_API_BASE: /api/v1
+    ports: ['5173:80']
+    depends_on: [backend]
+
+  migrate:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    command: node src/migrations/run.js && node src/migrations/seed.js
+    environment:
+      DATABASE_URL: postgres://urbanflow:urbanflow@db:5432/urbanflow
+    depends_on:
+      db: { condition: service_healthy }
+
+volumes:
+  pgdata:
