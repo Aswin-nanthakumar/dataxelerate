@@ -11,8 +11,8 @@ export default defineConfig({
     port: 5173,
     host: '0.0.0.0',
     proxy: {
-      '/api': { target: process.env.VITE_API_URL || 'http://localhost:4000', changeOrigin: true },
-      '/health': { target: process.env.VITE_API_URL || 'http://localhost:4000', changeOrigin: true },
+      '/api': { target: process.env.VITE_API_URL || 'https://dataxelerate.onrender.com', changeOrigin: true, secure: false },
+      '/health': { target: process.env.VITE_API_URL || 'https://dataxelerate.onrender.com', changeOrigin: true, secure: false },
     },
   },
   build: {

@@ -13,7 +13,7 @@ module.exports = {
   },
   servers: [
     { url: '/api/v1', description: 'Current deployment' },
-    { url: 'https://urbanflow-api.onrender.com/api/v1', description: 'Production (Render)' },
+    { url: 'https://dataxelerate.onrender.com/api/v1', description: 'Production (Render)' },
   ],
   tags: [
     { name: 'Health', description: 'Liveness & readiness probes' },

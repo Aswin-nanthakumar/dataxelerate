@@ -4,8 +4,8 @@
   "outputDirectory": "dist",
   "framework": "vite",
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "https://urbanflow-api.onrender.com/api/$1" },
-    { "source": "/health(.*)", "destination": "https://urbanflow-api.onrender.com/health$1" },
+    { "source": "/api/(.*)", "destination": "https://dataxelerate.onrender.com/api/$1" },
+    { "source": "/health(.*)", "destination": "https://dataxelerate.onrender.com/health$1" },
     { "source": "/(.*)", "destination": "/index.html" }
   ],
   "headers": [

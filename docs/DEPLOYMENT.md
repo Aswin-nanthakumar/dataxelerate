@@ -80,8 +80,7 @@ GitHub secret `RENDER_DEPLOY_HOOK_AI` for CI deploys.
    | Build command | `npm run build` |
    | Output directory | `dist` |
 3. `frontend/vercel.json` is picked up automatically:
-   - rewrites `/api/*` and `/health*` to the Render API host
-     (**edit the destination** `https://urbanflow-api.onrender.com` to your Render URL)
+   - rewrites `/api/*` and `/health*` to the Render API host (`https://dataxelerate.onrender.com`)
    - SPA fallback to `index.html`
    - security headers + immutable `/assets/*` caching
 4. Env: `VITE_API_BASE=/api/v1`.
@@ -92,10 +91,10 @@ GitHub secret `RENDER_DEPLOY_HOOK_AI` for CI deploys.
 ## 5. Post-deploy checklist
 
 ```bash
-curl https://urbanflow-api.onrender.com/health          # {"status":"ok"}
-curl https://urbanflow-api.onrender.com/health/ready    # database:true, cache:true
+curl https://dataxelerate.onrender.com/health          # {"status":"ok"}
+curl https://dataxelerate.onrender.com/health/ready    # database:true, cache:true
 curl https://urbanflow-ai.onrender.com/health           # models: xgboost/lightgbm/sklearn true
-curl -X POST https://urbanflow-api.onrender.com/api/v1/auth/login \
+curl -X POST https://dataxelerate.onrender.com/api/v1/auth/login \
   -H 'content-type: application/json' \
   -d '{"email":"admin@urbanflow.ai","password":"Urbanflow#2026"}'   # 200 + tokens
 ```
